@@ -92,6 +92,13 @@
     <Content Include="content\bootstrap.css" />
     <Content Include="content\bootstrap.min.css" />
     <Content Include="content\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="modelConfig\config\baseConfig.js" />
+    <Content Include="modelConfig\config\personConfig.js" />
+    <Content Include="modelConfig\config\productConfig.js" />
+    <Content Include="modelConfig\config\setup.js" />
+    <Content Include="modelConfig\mapping\baseMapping.js" />
+    <Content Include="modelConfig\mapping\personViewMapper.js" />
+    <Content Include="modelConfig\mapping\setup.js" />
     <Content Include="Scripts\app\app.js" />
     <Content Include="Scripts\app\derectives.js" />
     <Content Include="Scripts\app\medelConfig.js" />
