@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+    <link href="content/bootstrap.min.css" rel="stylesheet" />
+    <script src="Scripts/jquery-2.1.1.min.js"></script>
+    <script src="Scripts/angular.js"></script>
+    <script src="scripts/angular-animate.js"></script>
+    <script src="scripts/angular-route.js"></script>
+    <script src="scripts/angular-sanitize.js"></script>
+    <script src="Scripts/breeze.debug.js"></script>
+    
+    <script src="Scripts/breeze.angular.js"></script>
+    <script src="Scripts/breeze.metadata-helper.js"></script>
+
+    <script src="Scripts/app/utility.js"></script>
+    <script src="Scripts/app/medelConfig.js"></script>
+    <script src="Scripts/app/validation.js"></script>
+    <script>
+        var app = angular.module('app', [
+            'breeze.angular'
+        ]);
+
+        app.run(['breeze', function (breeze) { }]);
+
+        app.value('metadata', {});
+
+        angular.module('app')
+            .factory('entityManagerFactory', ['breeze', 'metadata', emFactory]);
+
+        function emFactory(breeze,metadata) {
+            var serviceRoot = window.location.protocol + '//' + window.location.host + '/';
+            var serviceName = serviceRoot + 'api/Person'; // breeze Web API controller
+
+            // the "factory" services exposes two members
+            var factory = {
+                newManager: function () {
+
+                    metadata = JSON.parse($.ajax('api/metadata/metadatas', { async: false }).responseText);
+                    window.metadata = metadata;
+                    var store = set(metadata, "api/person");
+                    var mngr = new breeze.EntityManager({
+                        serviceName: serviceName,
+                        metadataStore: store
+                    });
+
+                    validation().set(mngr, meatadata);
+                    return mngr;
+                },
+                serviceName: serviceName
+            };
+
+            return factory;
+        }
+
+        app.controller('three', ['$scope', 'entityManagerFactory', '$q', three]);
+
+        function three($scope, entityManager) {
+            var manager = entityManager.newManager();
+            $scope.person = {};
+            $scope.isEditing = false;
+            $scope.isValidationSummanry = true;
+            $scope.create = function () {
+                var type = manager.metadataStore.getEntityType('Person');
+                var newEntity = type.createEntity();
+                $scope.person = newEntity;
+                manager.addEntity(newEntity);
+
+                $scope.isEditing = true;
+            };
+
+            $scope.propError = function (propName) {
+                return  $scope.person.errors.filter(function(e) {
+                    return e.propertyName == propName;
+                });
+            }
+        }
+
+
+    </script>
+
+</head>
+
+    <body ng-app="app">
+        
+        
+    
+        <div ng-controller="three" style="padding: 20px">
+            <a class="btn btn-primary" ng-click="create()">
+                <i class="glyphicon glyphicon-plus"></i>
+                جدید
+            </a>
+            <input type="checkbox" ng-model="isValidationSummanry" />
+            <form role="form" style="width: 30%" ng-if="isEditing">
+                <div class="form-group has-error has-feedback"
+                     ng-class="{'has-error': propError('FirstName').any() , 'has-feedback': propError('FirstName').any()}">
+                    <label>نام : </label>
+                    <input type="text" class="form-control " ng-model="person.FirstName" />
+                    <span class="glyphicon glyphicon-remove form-control-feedback"
+                          ng-show="propError('FirstName').any()"></span>
+                    <span ng-repeat="e in propError('FirstName')" ng-show="!isValidationSummanry"
+                          class="label label-danger"
+                          style="margin-left: 3px">.
+                        {{e.errorMessage}}
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label>نام خانوادگی : </label>
+                    <input type="text" class="form-control" ng-model="person.LastName" />
+                    <span ng-repeat="e in propError('LastName')" ng-show="!isValidationSummanry"
+                          class="label label-danger"
+                          style="margin-left: 3px">
+                        {{e.errorMessage}}
+                    </span>
+                </div>
+                <div class="form-group">
+                    <label>ایمیل : </label>
+                    <input type="text" class="form-control" ng-model="person.Email" />
+                    <span ng-repeat="e in propError('Email')" ng-show="!isValidationSummanry"
+                          class="label label-danger"
+                          style="margin-left: 3px">
+                        {{e.errorMessage}}
+                    </span>
+                </div>
+               
+                <div class="alert alert-danger" role="alert" ng-show="person.hasError">
+                    <strong>خطا ها را تصحیح کنید!</strong>
+                    <ul>
+                        <li ng-repeat="e in person.errors">
+                            {{e.errorMessage}}
+                        </li>
+                    </ul>
+                </div>
+                <button type="button" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+</body>
+</html>
