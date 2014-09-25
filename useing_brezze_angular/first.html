@@ -1,0 +1,157 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="app">
+<head>
+    <title></title>
+    <script src="Scripts/angular.js"></script>
+    <script src="scripts/angular-animate.js"></script>
+    <script src="scripts/angular-route.js"></script>
+    <script src="scripts/angular-sanitize.js"></script>
+
+    <script src="Scripts/breeze.min.js"></script>
+    <script src="Scripts/breeze.angular.js"></script>
+
+    <script src="Scripts/app/utility.js"></script>
+    <style>
+        body {
+            font-size: 12px
+        }
+    </style>
+</head>
+<body>
+    <script>
+        
+
+        var app = angular.module('app', [
+            'breeze.angular'
+        ]);
+
+        app.run(['breeze', function (breeze) { }]);
+
+        angular.module('app')
+            .factory('entityManagerFactory', ['breeze', emFactory]);
+
+        function emFactory(breeze) {
+            // Convert properties between server-side PascalCase and client-side camelCase
+            breeze.NamingConvention.camelCase.setAsDefault();
+
+            // Identify the endpoint for the remote data service
+            var serviceRoot = window.location.protocol + '//' + window.location.host + '/';
+            var serviceName = serviceRoot + 'api/Person'; // breeze Web API controller
+
+            // the "factory" services exposes two members
+            var factory = {
+                newManager: function() {
+                    var mngr = new breeze.EntityManager(serviceName);
+                    mngr.metadataStore.registerEntityTypeCtor("Person",
+                        function() {
+                            this.errors = [];
+                            this.hasError = false;
+                            this.fullName = function () {
+                                if (this.fName + this.lName == '')
+                                    return '';
+                                return this.fName + '***' + this.lName;
+                            };
+                        },
+                        function(entity) {
+                            entity.entityAspect.validationErrorsChanged.subscribe(onChange);
+
+
+                            function onChange(vld) {
+                               var entity = vld.entity;
+                                var errors = entity.entityAspect.getValidationErrors();
+                                entity.errors.removeAll();
+
+                                errors.forEach(function (error) {
+                                    entity.errors.push(error);
+                                });
+
+                                entity.hasError = entity.errors.length > 0;
+                            }
+                        });
+
+                    return mngr;
+                },
+                serviceName: serviceName
+            };
+
+            return factory;
+        }
+
+        app.controller('first', ['$scope', 'entityManagerFactory', '$q', first]);
+
+        function first($scope, entityManager, $q) {
+            var manager = entityManager.newManager();
+            $scope.people = [{ fName: 'a', lName: 'b' }];
+            $scope.isEditing = false;
+            
+            $scope.fetch = function() {
+               
+                var q = breeze.EntityQuery.from('People');
+                var defferd = $q.defer();
+                manager.executeQuery(q)
+                    .then(function (data) {
+                        $scope.people = data.results;
+                        if (!$scope.$parent.$$phase) {
+                            $scope.$parent.$apply();
+                        }
+                    });
+            };
+            $scope.fetch();
+            $scope.person = { fName: '', lName: '' };
+            
+            $scope.create = function() {
+                var type = manager.metadataStore.getEntityType('Person');
+                var newEntity = type.createEntity();
+                manager.addEntity(newEntity);
+                
+                $scope.person = newEntity;
+                $scope.$apply('person');
+                $scope.isEditing = true;
+            };
+            
+            $scope.save = function() {
+                manager.saveChanges()
+                    .then(function() {
+                        $scope.isEditing = false;
+                        $scope.fetch();
+                    });
+            };
+        }
+    </script>
+    
+    <div ng-controller="first">
+        
+        <div ng-if="!isEditing">
+            <a href="#" ng-click="fetch()">Fetch</a>
+            <input type="button" value="Create" ng-click="create()" />
+            <ul>
+                <li ng-repeat="p in people">
+                    {{p.fName + ' ' + p.lName}}
+                </li>
+            </ul>
+        </div>
+        
+        <div ng-if="isEditing">
+            <div>
+                <label>First name : </label>
+                <input type="text" ng-model="person.fName" />
+            </div>
+            <div>
+                <label>Last name : </label>
+                <input type="text" ng-model="person.lName" />
+            </div>
+            <h1>{{person.fullName()}}</h1>
+            <div ng-show="person.hasError">
+                <ul>
+                    <li ng-repeat="e in person.errors">
+                        {{e.errorMessage}}
+                    </li>
+                </ul>
+            </div>
+            <input type="button" value="Save" ng-click="save()"/>
+        </div>
+        
+     
+    </div>
+</body>
+</html>
