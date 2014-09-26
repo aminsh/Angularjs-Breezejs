@@ -174,3 +174,12 @@
     window.endWaiting = function() {
         $('.waiting').remove();
     };
+
+    window.getKeys = function (obj) {
+        var keys = [];
+        for (key in obj) {
+            keys.push(key);
+        }
+
+        return keys;
+    };

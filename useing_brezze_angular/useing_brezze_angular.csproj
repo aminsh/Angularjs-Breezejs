@@ -96,9 +96,12 @@
     <Content Include="modelConfig\config\personConfig.js" />
     <Content Include="modelConfig\config\productConfig.js" />
     <Content Include="modelConfig\config\setup.js" />
+    <Content Include="modelConfig\contextService.js" />
     <Content Include="modelConfig\mapping\baseMapping.js" />
     <Content Include="modelConfig\mapping\personViewMapper.js" />
     <Content Include="modelConfig\mapping\setup.js" />
+    <Content Include="modelConfig\validation\validate.js" />
+    <Content Include="modelConfig\validation\validators.js" />
     <Content Include="Scripts\app\app.js" />
     <Content Include="Scripts\app\derectives.js" />
     <Content Include="Scripts\app\medelConfig.js" />
@@ -114,6 +117,7 @@
     <None Include="Scripts\jquery-2.1.1.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.1.js" />
     <Content Include="Scripts\jquery-2.1.1.min.js" />
+    <Content Include="Scripts\watch.js" />
     <Content Include="second.html" />
     <Content Include="first.html" />
     <Content Include="packages.config">
@@ -619,6 +623,7 @@
     <Content Include="Scripts\breeze.min.js" />
     <Content Include="Scripts\q.js" />
     <Content Include="Scripts\q.min.js" />
+    <Content Include="testWatch.html" />
     <Content Include="three.html" />
     <Content Include="user_directive.html" />
     <Content Include="using_factory.html" />

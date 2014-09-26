@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+
+    <script src="Scripts/breeze.debug.js"></script> 
+     <script src="Scripts/watch.js"></script>
+</head>
+<body>
+    <script>
+        
+        Object.prototype.subscribe = function (handler) {
+            watch(this, function () {
+                handler();
+            });
+        };
+
+        var x = { id: 1 };
+        x.subscribe(function() {
+            alert('x is changed ....');
+            console.info('x is changed ....');
+        });
+
+        x.id = 56;
+
+        var ex1 = {
+            attr1: "initial value of attr1",
+            attr2: "initial value of attr2"
+        };
+
+        //defining a 'watcher' for an attribute
+        //watch(ex1, "attr1", function () {
+        //    alert("attr1 changed!");
+        //});
+        
+        watch(ex1, function () {
+            alert("some attribute of ex3 changes!");
+        });
+
+
+        //when changing the attribute its watcher will be invoked
+        ex1.attr1 = "other value";
+        ex1.attr2 = "other";
+    </script>
+</body>
+</html>
