@@ -1,6 +1,13 @@
 ﻿
-function contextService(baseMapping, baseConfig) {
+function contextService() {
+
     function submit(item, url, method) {
+        if (config.validateOn == 'submit')
+            validation.validate(item);
+
+        if (item.hasError)
+            return false;
+
         var deferred = $.Deferred();
 
         if (item.hasError) {
@@ -8,9 +15,8 @@ function contextService(baseMapping, baseConfig) {
             return deferred.promise();
         }
             
-
-        if (!url.startsWith('api'))
-            url = 'api/' + url;
+        if (!url.startsWith(config.rootUrl))
+            url = config.rootUrl + url;
 
         if (isNullOrEmpty(method))
             method = 'POST';
@@ -57,7 +63,7 @@ function contextService(baseMapping, baseConfig) {
             if (!isNullOrEmpty(q.parameters))
                 options.data = q.parameters;
 
-            $.ajax(url, options)
+            $.ajax(config.rootUrl + url, options)
                 .done(function(result) {
                     if (isNullOrEmpty(q.mapperName))
                         return result;
@@ -87,6 +93,14 @@ function contextService(baseMapping, baseConfig) {
 
         var type = baseConfig.first(function (m) { return m.Name == modelName; });
         item.type = type;
+        item.submit = function(url, method) {
+            submit(item, url, method);
+        };
+
+        if (config.validateOn == 'propertyChange')
+            item.onChange(function() {
+                validation.validate(item);
+            });
 
         return item;
     }
@@ -98,9 +112,15 @@ function contextService(baseMapping, baseConfig) {
     };
 }
 
-define(['app', 'modelMap/baseMapping', 'modelConfig/baseConfig'], context);
+define([
+    'app',
+    'modelMap/baseMapping',
+    'modelConfig/baseConfig',
+    'modelConfig/config',
+    'modelConfig/validation/validate'
+], context);
 
 
-function context(app) {
+function context(app, baseMapping, baseConfig, config, validation) {
     app.factory('contextService', [contextService]);
 }

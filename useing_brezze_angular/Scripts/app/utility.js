@@ -121,7 +121,11 @@
         
         return false;
     };
-    
+
+    window.isArray = function(item) {
+        return angular.isArray(item);
+    };
+
     String.prototype.replaceAll = function (token, newToken, ignoreCase) {
         var _token;
         var str = this + "";
